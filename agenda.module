@@ -136,6 +136,11 @@ function _fetch_events($calendars) {
                 if (!isset($thisevent['when'])) {
                     continue;
                 }
+
+                // Grab the start of a "when" by cutting off the "9am to ..."
+                if ($pos = strpos($thisevent['when'], ' to ') !== false) {
+                    $thisevent['when'] = substr($thisevent['when'], 0, $pos);
+                }
                 
                 // Special processing for some fields
                 $thisevent['index']    = (int) $calindex;

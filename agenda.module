@@ -8,7 +8,10 @@ function agenda_help($path, $arg) {
   $output = '';  //declare your output variable
   switch ($path) {
     case "admin/help#agenda":
-      $output = '<p>'.  t("Displays an agenda of events for a facebook entity") .'</p>';
+      $output = '<p>'.  t("Displays an agenda of events from a google calendar") .'</p>';
+      break;
+    case "admin/settings/agenda/debug":
+      $output = '<p>'.  t("The agenda block will not show when there are no applicable events to display. If the block is not showing, and you think it should, this page may help you debug the situation.") .'</p>';
       break;
   }
   return $output;
@@ -94,7 +97,7 @@ function agenda_menu() {
    );
 
   $items['admin/settings/agenda/debug'] = array(
-    'title'            => 'Debug',
+    'title'            => 'Test Settings',
     'description'      => 'Show parsing steps when events are not showing',
     'page callback'    => 'agenda_debug',
     'access arguments' => array('access administration pages'),
@@ -203,7 +206,7 @@ function agenda_display_block() {
   }
 
   // Fetch the calendar data
-  $events = _fetch_events($calendars);
+  $events = _agenda_fetch_events($calendars);
 
   // Group the events by date
   $groupedevents = array();
@@ -252,18 +255,17 @@ function agenda_debug() {
  * Create the debugging form
  */
 function agenda_debug_form($form_state) {
-  $form['agenda_calendarid'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Calendar ID'),
-    '#description' => t("Enter the Calendar ID you wish to debug. It should look like an email address, usually in the form of <em>d2scnn6m2sb1iuqm8bnr5a6oi8@group.calendar.google.com</em>"),
-    '#required' => TRUE,
+  $examplecalendar = 'pv8lpo3kgj3347a52gg2shmljo@group.calendar.google.com';
+  
+  $form['agenda_debug_calendarid'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Calendar ID'),
+    '#description'   => t("Enter the Calendar ID you wish to debug. It should look like an email address, usually in the form of <em>{$examplecalendar}</em>"),
+    '#required'      => TRUE,
+    '#default_value' => variable_get('agenda_debug_calendarid', $examplecalendar),
   );
   
-  if (isset($form_state['values']['agenda_calendarid'])) {
-    $form['agenda_calendarid']['#default_value'] = $form_state['values']['agenda_calendarid'];
-  }
-  
-  $form['agenda_debug'] = array(
+  $form['agenda_debug_submit'] = array(
     '#type' => 'submit',
     '#value' => t('Debug'),
   );
@@ -276,8 +278,8 @@ function agenda_debug_form($form_state) {
  * Validation for agenda_debug_form
  */
 function agenda_debug_form_validate($form, &$form_state) {
-  if (!valid_email_address($form_state['values']['agenda_calendarid'])) {
-    form_set_error('agenda_calendarid', t('Invalid calendar ID'));
+  if (!valid_email_address($form_state['values']['agenda_debug_calendarid'])) {
+    form_set_error('agenda_debug_calendarid', t('Invalid calendar ID'));
   }
 }
 
@@ -286,40 +288,77 @@ function agenda_debug_form_validate($form, &$form_state) {
  * Action for agenda_debug_form
  */
 function agenda_debug_form_submit($form, &$form_state) {
+  variable_set('agenda_debug_calendarid', $form_state['values']['agenda_debug_calendarid']);
   $form_state['rebuild'] = true;
-  $googleid = $form_state['values']['agenda_calendarid'];
-  $continue = true;
+  $googleid = $form_state['values']['agenda_debug_calendarid'];
   
   // Use a poor mans GOTO
-  while ($continue) {
+  while (true) {
     $output = array();
-    $output[] = 'Starting debug';
-    
+        
     // Load the calendar
     $sourcepattern = 'http://www.google.com/calendar/feeds/%s/public/basic';
     $source = sprintf($sourcepattern, urlencode(check_plain($googleid)));
-    $output[] = 'Fetching from ' . $source;
+    $output[] = 'Fetching feed from ' . $source;
     
     // Load the XML
-    $output[] = 'Attempting to load XML';
     $calendar = simplexml_load_file($source);
     if (!$calendar) {
-      $output[] = 'Error #001: Failed to load XML';
-      $continue = false;
+      $output[] = 'Error: Failed to load XML';
+      break;
     }
     $output[] = 'Loaded XML successfully';
     
+    // Find the events
+    $number_of_events = count($calendar->entry);
+    $output[] = sprintf('Found %d events', $number_of_events);
+    if ($number_of_events === 0) {
+      $output[] = 'Warning: Nothing to do with empty calendar, stopping!';
+      break;
+    }
+    
     // Parse the events
-    $output[] = 'Looking for events';
-    $output[] = sprintf('Found %d events', count($calendar->entry));
+    $i = 0;
+    $eventdata = array();
+    foreach ($calendar->entry as $event) {
+      $output[] = sprintf('Loading event %d which is %d bytes', ++$i, strlen($event->asXml()));
+      $output[] = sprintf("<pre>%s</pre>", print_r((array) $event, true));
+      
+      $thisevent = _agenda_parse_event($event);
+      if (!$thisevent) {
+        $output[] = 'Warning: Failed to parse event!';
+        continue;
+      }
+
+      $output[] = 'Successfully parsed event:';
+      $output[] = '<pre>' . print_r($thisevent, true) . '</pre>';     
+      $eventdata[] = $thisevent;
+    }
     
-    // TODO
-    //
-    //
+    $output[] = sprintf('Parsed %d/%d events successfully', count($eventdata), $number_of_events);
     
+    $output[] = sprintf('Begin filtering based on date: string provided (%s) which has timestamp (%d) which has date (%s).',
+      $what_is_old = variable_get('agenda_old', ''),
+      $what_is_old_ts = strtotime($what_is_old),
+      format_date($what_is_old_ts)
+      );
     
-    // End
-    $continue = false;
+    foreach ($eventdata as $key => $event) {
+      if ($event['when'] < $what_is_old_ts) {
+        $output[] = sprintf('&raquo; Discarding <em>%s</em> because <em>%s</em> is older than <em>%s</em>',
+          $event['title'],
+          format_date($event['when'], 'small'),
+          format_date($what_is_old_ts, 'small')
+          );
+        unset($eventdata[$key]);
+      }
+    }
+    
+    $output[] = sprintf('Finished. Started with %d events, will display %d events', $number_of_events, count($eventdata));
+    foreach ($eventdata as $event) {
+      $output[] = sprintf('&raquo; <em>%s</em> at <em>%s</em>', $event['title'], format_date($event['when']));
+    }
+    break;
   }
   
   $GLOBALS['agenda'] = $output;
@@ -333,7 +372,7 @@ function agenda_debug_form_submit($form, &$form_state) {
  * @param bool $cacheaction Whether to interact with the cache
  * @access private
  */
-function _fetch_events($calendars, $cacheaction = true) {
+function _agenda_fetch_events($calendars, $cacheaction = true) {
   // Check the cache
   if ($cacheaction) {
     $eventdata = cache_get('agenda_eventdata', 'cache');
@@ -357,31 +396,13 @@ function _fetch_events($calendars, $cacheaction = true) {
     
     // Parse out the event details
     foreach ($calendar->entry as $event) {
-      $thisevent = array();
-      $content = explode('<br />', $event->content);
-      foreach ($content as $item) {
-        $item = trim($item);
-        if (empty($item) || !strpos($item, ':')) { continue; }
-        list ($key, $value) = explode(':', $item, 2);
-        $thisevent[strtolower(trim(check_plain($key)))] = filter_xss(trim($value));
-      }
-      
-      // Make sure we have a when
-      // This means no support for recurring events
-      if (!isset($thisevent['when'])) {
+      $thisevent = _agenda_parse_event($event);
+      if (!$thisevent) {
         continue;
       }
 
-      // Grab the start of a "when" by cutting off the "9am to ..."
-      if ($pos = strpos($thisevent['when'], ' to ') !== false) {
-        $thisevent['when'] = substr($thisevent['when'], 0, $pos);
-      }
-      
-      // Special processing for some fields
       $thisevent['index']    = (int) $calindex;
       $thisevent['calendar'] = (string) $calendar->title;
-      $thisevent['when']     = strtotime($thisevent['when']);
-      $thisevent['title']    = (string) $event->title;
       $eventdata[] = $thisevent;
     }
   }
@@ -393,4 +414,37 @@ function _fetch_events($calendars, $cacheaction = true) {
   }
   
   return $eventdata;
+}
+
+
+/**
+ *
+ */
+function _agenda_parse_event($event) {
+  $thisevent = array();
+  
+  $content = explode('<br />', $event->content);
+  foreach ($content as $item) {
+    $item = trim($item);
+    if (empty($item) || !strpos($item, ':')) { continue; }
+    list ($key, $value) = explode(':', $item, 2);
+    $thisevent[strtolower(trim(check_plain($key)))] = filter_xss(trim($value));
+  }
+
+  // Make sure we have a when
+  // This means no support for recurring events
+  if (!isset($thisevent['when'])) {
+    return false;
+  }
+  
+  // Parse the date
+  $date = '[a-z]+ [0-9]{1,2} [a-z]+ [0-9]{4}';
+  $time = '[0-9]{2}:[0-9]{2}';
+  $exp = "/^(?<sd>$date)(?: (?<st>$time) to (?<ed>$date) (?<et>$time))?/i";
+  $result = preg_match($exp, $thisevent['when'], $matches);
+
+  $thisevent['when'] = strtotime($matches['sd']);
+  $thisevent['title'] = (string) $event->title;
+
+  return $thisevent;
 }

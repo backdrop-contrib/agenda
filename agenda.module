@@ -17,6 +17,7 @@ function agenda_help($path, $arg) {
   return $output;
 }
 
+
 /**
  * Implementation of hook_perm()
  */
@@ -382,7 +383,7 @@ function _agenda_fetch_events($calendars, $cacheaction = true) {
   }
 
   // Otherwise parse the calendars
-  $sourcepattern = 'http://www.google.com/calendar/feeds/%s/public/basic';
+  $sourcepattern = 'http://www.google.com/calendar/feeds/%s/public/basic?hl=en_GB';
   $eventdata = array();
   foreach ($calendars as $calindex => $googleid) {
     $source = sprintf($sourcepattern, urlencode(check_plain($googleid)));
@@ -442,8 +443,15 @@ function _agenda_parse_event($event) {
   $time = '[0-9]{2}:[0-9]{2}';
   $exp = "/^(?<sd>$date)(?: (?<st>$time) to (?<ed>$date) (?<et>$time))?/i";
   $result = preg_match($exp, $thisevent['when'], $matches);
+  $timestamp = strtotime($matches['sd']);
+  
+  // Check we got a date
+  if (empty($timestamp) || $timestamp <= 0) {
+    return false;
+  }
 
-  $thisevent['when'] = strtotime($matches['sd']);
+  // Add some extra fields
+  $thisevent['when']  = $timestamp;
   $thisevent['title'] = (string) $event->title;
 
   return $thisevent;

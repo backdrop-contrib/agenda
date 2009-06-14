@@ -2,6 +2,12 @@
 // $Id$
 
 /**
+ * The google calendar feed address
+ */
+define('AGENDA_SOURCEPATTERN', $sourcepattern = 'http://www.google.com/calendar/feeds/%s/public/basic?hl=en_GB');
+
+
+/**
  * Implementation of hook_help()
  */
 function agenda_help($path, $arg) {
@@ -298,8 +304,7 @@ function agenda_debug_form_submit($form, &$form_state) {
     $output = array();
         
     // Load the calendar
-    $sourcepattern = 'http://www.google.com/calendar/feeds/%s/public/basic';
-    $source = sprintf($sourcepattern, urlencode(check_plain($googleid)));
+    $source = sprintf(AGENDA_SOURCEPATTERN, urlencode(check_plain($googleid)));
     $output[] = 'Fetching feed from ' . $source;
     
     // Load the XML
@@ -383,10 +388,9 @@ function _agenda_fetch_events($calendars, $cacheaction = true) {
   }
 
   // Otherwise parse the calendars
-  $sourcepattern = 'http://www.google.com/calendar/feeds/%s/public/basic?hl=en_GB';
   $eventdata = array();
   foreach ($calendars as $calindex => $googleid) {
-    $source = sprintf($sourcepattern, urlencode(check_plain($googleid)));
+    $source = sprintf(AGENDA_SOURCEPATTERN, urlencode(check_plain($googleid)));
     $calendar = @simplexml_load_file($source);
     
     // If we fail to load the XML, handle it

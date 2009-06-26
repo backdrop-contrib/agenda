@@ -14,10 +14,10 @@ function agenda_help($path, $arg) {
   $output = '';  //declare your output variable
   switch ($path) {
     case "admin/help#agenda":
-      $output = '<p>'.  t("Displays an agenda of events from a google calendar") .'</p>';
+      $output = '<p>'.  t('Displays an agenda of events from a google calendar') .'</p>';
       break;
     case "admin/settings/agenda/debug":
-      $output = '<p>'.  t("The agenda block will not show when there are no applicable events to display. If the block is not showing, and you think it should, this page may help you debug the situation.") .'</p>';
+      $output = '<p>'.  t('The agenda block will not show when there are no applicable events to display. If the block is not showing, and you think it should, this page may help you debug the situation.') .'</p>';
       break;
   }
   return $output;
@@ -35,7 +35,7 @@ function agenda_perm() {
 /**
  * Implementation of hook_block()
  */
-function agenda_block($op='list', $delta=0) {
+function agenda_block($op = 'list', $delta = 0) {
   switch($op) {
     case 'list':
       $blocks[0] = array(
@@ -83,10 +83,10 @@ function agenda_menu() {
   $items = array();
 
   $items['admin/settings/agenda'] = array(
-    'title' => 'Agenda',
-    'description' => 'Configure rendering options and specify calendar sources',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('agenda_admin'),
+    'title'            => 'Agenda',
+    'description'      => 'Configure rendering options and specify calendar sources',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('agenda_admin'),
     'access arguments' => array('access administration pages'),
    );
 
@@ -117,60 +117,60 @@ function agenda_menu() {
 function agenda_admin() {
 
   $form['agenda_old'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Define old'),
+    '#type'          => 'textfield',
+    '#title'         => t('Do not show events older than'),
     '#default_value' => variable_get('agenda_old', 'yesterday'),
-    '#description' => t("A string indicating what old really is - events before this are not shown."),
-    '#required' => TRUE,
+    '#description'   => t("Any events older than this string are not displayed. You can use any string <a href='http://php.net/strtotime'>strtotime</a> can parse."),
+    '#required'      => TRUE,
   );
   
   $form['agenda_datelimit'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Dates to display'),
+    '#type'          => 'textfield',
+    '#title'         => t('Dates to display'),
     '#default_value' => variable_get('agenda_datelimit', 4),
-    '#description' => t("The maximum number of unique dates to display."),
-    '#required' => TRUE,
+    '#description'   => t("The maximum number of unique dates to display."),
+    '#required'      => TRUE,
   );
   
   $form['agenda_dateformat'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Format of the dates displayed'),
+    '#type'          => 'textfield',
+    '#title'         => t('Format of the dates displayed'),
     '#default_value' => variable_get('agenda_dateformat', 'custom'),
-    '#description' => t('The first parameter provided to <em>format_date</em>; small, medium, large or custom.'),
-    '#required' => TRUE,
+    '#description'   => t('The first parameter provided to <em>format_date</em>; small, medium, large or custom.'),
+    '#required'      => TRUE,
   );
   
   $form['agenda_customdate'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Custom date formatting'),
+    '#type'          => 'textfield',
+    '#title'         => t('Custom date formatting'),
     '#default_value' => variable_get('agenda_customdate', 'l, F jS'),
-    '#description' => t('If you have specified <em>custom</em> above, then specify the date format here.'),
-    '#required' => FALSE,
+    '#description'   => t('If you have specified <em>custom</em> above, then specify the date format here.'),
+    '#required'      => FALSE,
   );
   
   $form['agenda_cachetime'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Amount of time to cache event data'),
+    '#type'          => 'textfield',
+    '#title'         => t('Amount of time to cache event data'),
     '#default_value' => variable_get('agenda_cachetime', 3600),
-    '#description' => t("How long (in seconds) the module should hold onto the ICS data before re-requesting it from Google."),
-    '#required' => TRUE,
+    '#description'   => t("How long (in seconds) the module should hold onto the ICS data before re-requesting it from Google."),
+    '#required'      => TRUE,
   );
   
   $form['agenda_display_keys'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Display fields'),
+    '#type'          => 'textfield',
+    '#title'         => t('Display fields'),
     '#default_value' => variable_get('agenda_display_keys', 'calendar, start time'),
-    '#description' => t("Comma separated list indicating which fields, parsed from the event summary, should be displayed."),
-    '#required' => FALSE,
+    '#description'   => t("Comma separated list indicating which fields, parsed from the event summary, should be displayed."),
+    '#required'      => FALSE,
   );
   
   $form['agenda_calendars'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Google Calendar IDs'),
-    '#default_value' => variable_get('agenda_calendars', ''),
-    '#rows' => 4,
-    '#description' => t("The public IDs of each google calendar you want to display, each on a newline."),
-    '#required' => TRUE,
+    '#type'          => 'textarea',
+    '#title'         => t('Google Calendar IDs'),
+    '#default_value' => variable_get('agenda_calendars', 'pv8lpo3kgj3347a52gg2shmljo@group.calendar.google.com'),
+    '#rows'          => 4,
+    '#description'   => t("The public IDs of each google calendar you want to display, each on a newline."),
+    '#required'      => TRUE,
   );
 
   return system_settings_form($form);
@@ -316,7 +316,8 @@ function agenda_debug_form_submit($form, &$form_state) {
   $googleid = $form_state['values']['agenda_debug_calendarid'];
   
   $output = array();
-      
+  $GLOBALS['agenda'] =& $output;
+        
   // Load the calendar
   $source = sprintf(AGENDA_SOURCEPATTERN, urlencode(check_plain($googleid)));
   $output[] = 'Fetching feed from ' . $source;
@@ -324,8 +325,7 @@ function agenda_debug_form_submit($form, &$form_state) {
   // Load the XML
   $calendar = simplexml_load_file($source);
   if (!$calendar) {
-    $output[] = 'Error: Failed to load XML';
-    $GLOBALS['agenda'] = $output;
+    $output[] = '<strong>Warning</strong>: Failed to load XML';
     return;
   }
   $output[] = 'Loaded XML successfully';
@@ -334,8 +334,7 @@ function agenda_debug_form_submit($form, &$form_state) {
   $number_of_events = count($calendar->entry);
   $output[] = sprintf('Found %d events', $number_of_events);
   if ($number_of_events === 0) {
-    $output[] = 'Warning: Nothing to do with empty calendar, stopping!';
-    $GLOBALS['agenda'] = $output;
+    $output[] = '<strong>Warning</strong>: Nothing to do with empty calendar, stopping!';
     return;
   }
   
@@ -348,7 +347,7 @@ function agenda_debug_form_submit($form, &$form_state) {
     
     $thisevent = _agenda_parse_event($event);
     if (!$thisevent) {
-      $output[] = 'Warning: Failed to parse event!';
+      $output[] = '<strong>Warning</strong>: Failed to parse event!';
       continue;
     }
 
@@ -380,8 +379,6 @@ function agenda_debug_form_submit($form, &$form_state) {
   foreach ($eventdata as $event) {
     $output[] = sprintf('&raquo; <em>%s</em> at <em>%s</em>', $event['title'], format_date($event['when']));
   }
-  
-  $GLOBALS['agenda'] = $output;
 }
 
 

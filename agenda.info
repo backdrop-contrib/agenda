@@ -1,4 +1,0 @@
-; $Id$
-name = Agenda
-description = Show an agenda of events from a remote source
-core = 6.x

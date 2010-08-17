@@ -1,13 +1,13 @@
-/* $Id$ */ 
+/* $Id$ */
 
 .agenda-block p { margin: 0; padding: 0; }
 .agenda-block ol { list-style-type: none; margin: 0 0 1em 0; padding: 0; }
-.agenda-block ol li { margin: .2em 0; padding: 1px 5px; color: white; font-size: 90%; background-image: none; } 
+.agenda-block ol li { margin: .2em 0; padding: 1px 5px; color: white; font-size: 90%; background-image: none; }
 .agenda-block ol li .calendar_title { cursor: pointer; }
 .agenda-block .moreinfo { display: none; list-style-type: none; margin: .2em 0; padding: .3em 0; }
 .agenda-block .moreinfo,
 .agenda-block .moreinfo p { line-height: 1.4em; }
-.agenda-block .moreinfo em { font-style: normal; text-decoration: underline; } 
+.agenda-block .moreinfo em { font-style: normal; text-decoration: underline; }
 .agenda-block .moreinfo a { color: white; }
 .agenda-block .moreinfo li { list-style-type: none; list-style-image: none; background-image: none; margin: .6em 0 0 0; padding: 0; font-size: 100%; }
 

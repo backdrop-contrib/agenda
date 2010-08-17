@@ -19,7 +19,7 @@ function agenda_admin() {
     'name' => t('Name'),
     'ops'  => t('Operations'),
   );
-  
+
   // Rows
   $res = db_query("SELECT id, bid, value FROM {agenda} WHERE name = 'title'");
   $rows = array();
@@ -42,7 +42,7 @@ function agenda_admin() {
   if (!empty($rows)) {
     $table = theme('table', array('header' => $header, 'rows' => $rows));
   }
-  
+
   return theme('agenda_admin', array('table' => $table));
 }
 
@@ -61,7 +61,7 @@ function agenda_admin_delete($form, $form_state, $delta) {
   $form['agenda_admin_delete_markup'] = array(
     '#value' => '<p>' . t('Are you sure you wish to delete this block?') . '</p>',
   );
-  
+
   $form['agenda_admin_delete_confirm'] = array(
     '#type'  => 'submit',
     '#value' => t('Delete block'),
@@ -75,18 +75,18 @@ function agenda_admin_delete($form, $form_state, $delta) {
  * Delete an agenda action
  */
 function agenda_admin_delete_submit($form, $form_state) {
-  
+
   // Clear the agenda variables table
   db_delete('agenda')
     ->condition('bid', $form['agenda_admin_delete_bid']['#value'])
     ->execute();
-    
-  // Also clear the block table  
+
+  // Also clear the block table
   db_delete('block')
     ->condition('delta', $form['agenda_admin_delete_bid']['#value'])
     ->condition('module', 'agenda')
     ->execute();
-  
+
   drupal_set_message('Agenda block was deleted');
   drupal_goto('admin/content/agenda');
 }
@@ -103,7 +103,7 @@ function agenda_admin_configure($form, $form_state, $delta) {
     '#type'           => 'hidden',
     '#value'          => (int) $delta,
   );
-   
+
   $form['agenda_title'] = array(
     '#type'           => 'textfield',
     '#title'          => t('Administrative title'),
@@ -112,7 +112,7 @@ function agenda_admin_configure($form, $form_state, $delta) {
     '#required'       => TRUE,
     '#agenda_setting' => TRUE,
   );
-  
+
   $form['agenda_start'] = array(
     '#type'           => 'textfield',
     '#title'          => t('Agenda start'),
@@ -183,7 +183,7 @@ function agenda_admin_configure($form, $form_state, $delta) {
     '#description'    => t('Leave blank to have the block hide when no events are found.'),
     '#agenda_setting' => TRUE,
   );
-  
+
   $form['agenda_linktext'] = array(
     '#type'           => 'textfield',
     '#title'          => t('Calendar link text'),
@@ -209,7 +209,7 @@ function agenda_admin_configure($form, $form_state, $delta) {
     '#required'       => FALSE,
     '#agenda_setting' => TRUE,
   );
-  
+
   $form['agenda_hide_labels'] = array(
     '#type'           => 'textfield',
     '#title'          => t('Hide labels'),
@@ -228,12 +228,12 @@ function agenda_admin_configure($form, $form_state, $delta) {
     '#required'       => TRUE,
     '#agenda_setting' => TRUE,
   );
-  
+
   $form['agenda_confirm'] = array(
     '#type'           => 'submit',
     '#value'          => t('Save settings'),
   );
-  
+
   return $form;
 }
 
@@ -301,13 +301,13 @@ function agenda_admin_configure_submit($form, $form_state) {
   if ($delta == 0) {
     $delta = db_query('SELECT COALESCE(MAX(bid)+1,1) AS count FROM {agenda}')->fetchField();
   }
-  
+
   // Save the settings
   foreach ($form_state['values'] as $key => $value) {
     if (!isset($form[$key]['#agenda_setting'])) {
       continue;
     }
-    $setting = substr($key, 7);    
+    $setting = substr($key, 7);
     agenda_variable_set($delta, $setting, $value);
   }
 
@@ -321,7 +321,7 @@ function agenda_admin_configure_submit($form, $form_state) {
  */
 function agenda_debug($bid) {
   $output     = array();
-  
+
   // Date check (http://drupal.org/node/545174)
   $output[]   = t('Checking server time: %date', array('%date' => gmdate('r')));
   $output[]   = t('Checking real UTC time via NTP: %date', array('%date' => gmdate('r', agenda_debug_ntp_time('0.pool.ntp.org'))));
@@ -339,7 +339,7 @@ function agenda_debug($bid) {
   if (count($calendars) > 1) {
     $output[] = t('Multiple calendars found, debugging with the first calendar: %googleid', array('%googleid' => $googleid));
   }
-  
+
   // Load the calendar
   $source = _agenda_feed_url($googleid, $block);
   $output[] = t('Fetching feed from <em>%source</em>', array('%source' => $source));
@@ -399,10 +399,10 @@ function agenda_debug($bid) {
 
   $output[] = t('Finished. Started with @total events, will display @display events', array('@total' => $number_of_events, '@display' => count($eventdata)));
 
-  
+
   // Now take all of our debug data and theme it up, starting with the logs
   $debug_log = theme('item_list', array('items' => $output));
-  
+
   // Build a table of all of the events found
   $event_table = '';
   if (count($eventdata)) {
@@ -431,15 +431,15 @@ function agenda_debug($bid) {
  * @return int The current unix timestamp
  */
 function agenda_debug_ntp_time($host) {
-  
+
   // Create a socket and connect to NTP server
   $sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
   socket_connect($sock, $host, 123);
-  
+
   // Send request
   $msg = "\010" . str_repeat("\0", 47);
   socket_send($sock, $msg, strlen($msg), 0);
-  
+
   // Receive response and close socket
   socket_recv($sock, $recv, 48, MSG_WAITALL);
   socket_close($sock);
@@ -447,11 +447,11 @@ function agenda_debug_ntp_time($host) {
   // Interpret response
   $data = unpack('N12', $recv);
   $timestamp = sprintf('%u', $data[9]);
-  
+
   // NTP is number of seconds since 0000 UT on 1 January 1900
   // Unix time is seconds since 0000 UT on 1 January 1970
-  $timestamp -= 2208988800;	
-  
+  $timestamp -= 2208988800;
+
   return $timestamp;
 }
 

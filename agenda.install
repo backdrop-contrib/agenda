@@ -36,7 +36,7 @@ function agenda_install_fixtures() {
     array(1, 'hide_labels',  'description, link'),
     array(1, 'calendars',    'drupalagenda@gmail.com'),
   );
-  
+
   $query = db_insert('agenda')
     ->fields(array('bid', 'name', 'value'));
   foreach ($records as $record) {

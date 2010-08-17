@@ -14,7 +14,7 @@ $dates[$today + 86400] = t('Tomorrow');
 
 // List of keys to display
 $keys    = array_map('trim', explode(',', $block->display_keys));
-$nolabel = array_map('trim', explode(',', $block->hide_labels)); 
+$nolabel = array_map('trim', explode(',', $block->hide_labels));
 ?>
 <div class="agenda-block">
   <?php foreach ($events as $day): ?>
@@ -37,7 +37,7 @@ $nolabel = array_map('trim', explode(',', $block->hide_labels));
           <?php if (!empty($event[$key])): ?>
             <li>
             <?php if (!in_array($key, $nolabel)): ?>
-              <em><?php echo drupal_ucfirst(_agenda_translate($key)); ?></em>: 
+              <em><?php echo _agenda_translate($key); ?></em>:
             <?php endif; ?>
             <?php echo $event[$key]; ?>
             </li>

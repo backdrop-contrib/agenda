@@ -2,7 +2,7 @@
 name = Agenda
 description = Show an agenda of events from a remote source
 core = 7.x
-configure = admin/config/agenda
+configure = admin/content/agenda
 dependencies[] = block
 files[] = agenda.admin.php
 files[] = agenda.install

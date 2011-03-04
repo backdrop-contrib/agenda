@@ -10,4 +10,4 @@
 <?php else: ?>
   <p>You have not created any blocks yet.</p>
 <?php endif; ?>
-<p>&raquo; <?php echo l('Create a new block', 'admin/content/agenda/0/configure'); ?>.</p>
+<p>&raquo; <?php echo l('Create a new block', 'admin/config/content/agenda/0/configure'); ?>.</p>

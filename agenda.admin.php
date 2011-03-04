@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * @file
  * Administration interface for the agenda module
@@ -24,10 +23,10 @@ function agenda_admin() {
   $rows = array();
   while ($row = $res->fetchObject()) {
     $actions = array(
-      'configure' => l(t('Configure'), sprintf('admin/content/agenda/%d/configure', $row->bid)),
-      'delete'    => l(t('Delete'), sprintf('admin/content/agenda/%d/delete', $row->bid)),
-      'debug'     => l(t('Debug'), sprintf('admin/content/agenda/%d/debug', $row->bid)),
-      'clear'     => l(t('Clear'), sprintf('admin/content/agenda/%d/clear', $row->bid)),
+      'configure' => l(t('Configure'), sprintf('admin/config/content/agenda/%d/configure', $row->bid)),
+      'delete'    => l(t('Delete'), sprintf('admin/config/content/agenda/%d/delete', $row->bid)),
+      'debug'     => l(t('Debug'), sprintf('admin/config/content/agenda/%d/debug', $row->bid)),
+      'clear'     => l(t('Clear'), sprintf('admin/config/content/agenda/%d/clear', $row->bid)),
     );
 
     $rows[] = array(
@@ -58,7 +57,7 @@ function agenda_admin_delete($form, $form_state, $delta) {
   );
 
   $form['agenda_admin_delete_markup'] = array(
-    '#value' => '<p>' . t('Are you sure you wish to delete this block?') . '</p>',
+    '#markup' => '<p>' . t('Are you sure you wish to delete this block?') . '</p>',
   );
 
   $form['agenda_admin_delete_confirm'] = array(
@@ -74,20 +73,19 @@ function agenda_admin_delete($form, $form_state, $delta) {
  * Delete an agenda action
  */
 function agenda_admin_delete_submit($form, $form_state) {
-
   // Clear the agenda variables table
   db_delete('agenda')
-    ->condition('bid', $form['agenda_admin_delete_bid']['#value'])
+    ->condition('bid', $form_state['values']['agenda_admin_delete_bid'])
     ->execute();
 
   // Also clear the block table
   db_delete('block')
-    ->condition('delta', $form['agenda_admin_delete_bid']['#value'])
+    ->condition('delta', $form_state['values']['agenda_admin_delete_bid'])
     ->condition('module', 'agenda')
     ->execute();
 
   drupal_set_message('Agenda block was deleted');
-  drupal_goto('admin/content/agenda');
+  drupal_goto('admin/config/content/agenda');
 }
 
 
@@ -223,7 +221,7 @@ function agenda_admin_configure($form, $form_state, $delta) {
     '#title'          => t('Google Calendar IDs'),
     '#default_value'  => agenda_variable_get($delta, 'calendars', 'drupalagenda@gmail.com'),
     '#rows'           => 4,
-    '#description'    => t("The public IDs of each google calendar you want to display, each on a new line."),
+    '#description'    => t("The IDs of each google calendar you want to display, each on a new line. For private calendars, include the access token after the email with a forward slash."),
     '#required'       => TRUE,
     '#agenda_setting' => TRUE,
   );
@@ -245,14 +243,14 @@ function agenda_admin_configure_validate($form, &$form_state) {
   drupal_set_message(t('Cache cleared for agenda block'));
   cache_clear_all('agenda_block_' . $form['agenda_bid']['#value'], 'cache');
 
-  // calendars (has the form of a valid email address)
+  // calendars (has the form of a valid email address and an optional access key)
   $calendars = $form_state['values']['agenda_calendars'];
   $ids = preg_split('@\r\n?|\n@', $calendars);
   if (empty($ids)) {
     form_set_error('agenda_calendars', t('Field can not be left blank'));
   }
   foreach ($ids as $id) {
-    if (!valid_email_address($id)) {
+    if (!_agenda_parse_googleid($id)) {
       form_set_error('agenda_calendars', t('Invalid calendar ID'));
     }
   }
@@ -311,7 +309,7 @@ function agenda_admin_configure_submit($form, $form_state) {
   }
 
   drupal_set_message('Block settings were saved successfully');
-  drupal_goto('admin/content/agenda');
+  drupal_goto('admin/config/content/agenda');
 }
 
 
@@ -340,11 +338,12 @@ function agenda_debug($bid) {
   }
 
   // Load the calendar
-  $source = _agenda_feed_url($googleid, $block);
+  list ($address, $token) = _agenda_parse_googleid($googleid);
+  $source = _agenda_feed_url($address, $token, $block);
   $output[] = t('Fetching feed from <em>%source</em>', array('%source' => $source));
 
   // Load the XML
-  $calendar = _agenda_load_xml($googleid, $block);
+  $calendar = _agenda_load_xml($address, $token, $block);
   if (!$calendar) {
     $output[] = t('<strong>Warning</strong>: Failed to load XML');
     return theme('item_list', $output, NULL, 'ul', array('id' => 'agenda-debug'));
@@ -461,5 +460,5 @@ function agenda_debug_ntp_time($host) {
 function agenda_clear($bid) {
   drupal_set_message(t('Cache cleared for agenda block'));
   cache_clear_all('agenda_block_' . $bid, 'cache');
-  drupal_goto('admin/content/agenda');
+  drupal_goto('admin/config/content/agenda');
 }

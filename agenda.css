@@ -1,14 +1,13 @@
-
-.agenda-block p { margin: 0; padding: 0; }
-.agenda-block ol { list-style-type: none; margin: 0 0 1em 0; padding: 0; }
-.agenda-block ol li { margin: .2em 0; padding: 1px 5px; color: white; font-size: 90%; background-image: none; }
-.agenda-block ol li .calendar_title { cursor: pointer; }
-.agenda-block .moreinfo { display: none; list-style-type: none; margin: .2em 0; padding: .3em 0; }
-.agenda-block .moreinfo,
-.agenda-block .moreinfo p { line-height: 1.4em; }
-.agenda-block .moreinfo em { font-style: normal; text-decoration: underline; }
-.agenda-block .moreinfo a { color: white; }
-.agenda-block .moreinfo li { list-style-type: none; list-style-image: none; background-image: none; margin: .6em 0 0 0; padding: 0; font-size: 100%; }
+.block .agenda-block p { margin: 0; padding: 0; }
+.block .agenda-block ol { list-style-type: none; margin: 0 0 1em 0; padding: 0; }
+.block .agenda-block ol li { margin: 1px 0; padding: 5px 10px; color: white; font-size: 90%; background-image: none; }
+.block .agenda-block ol li .calendar_title { cursor: pointer; }
+.block .agenda-block .moreinfo { display: none; list-style-type: none; margin: .2em 0; padding: .3em 0; }
+.block .agenda-block .moreinfo,
+.block .agenda-block .moreinfo p { line-height: 1.4em; }
+.block .agenda-block .moreinfo em { font-style: normal; text-decoration: underline; }
+.block .agenda-block .moreinfo a { color: white; }
+.block .agenda-block .moreinfo li { list-style-type: none; list-style-image: none; background-image: none; margin: .6em 0 0 0; padding: 0; font-size: 100%; }
 
 .agenda-block .cal_0 { background-color: #E6804D; }
 .agenda-block .cal_1 { background-color: #E0C240; }

@@ -150,7 +150,7 @@ function agenda_admin_configure($form, $form_state, $delta) {
     '#type'           => 'textfield',
     '#title'          => t('Format of the dates displayed'),
     '#default_value'  => agenda_variable_get($delta, 'dateformat', 'custom'),
-    '#description'    => t('The first parameter provided to <a href="http://api.drupal.org/api/search/6/format_date">format_date</a>; small, medium, large or custom.'),
+    '#description'    => t('The first parameter provided to <a href="http://api.drupal.org/api/search/7/format_date">format_date</a>; small, medium, large or custom.'),
     '#required'       => TRUE,
     '#agenda_setting' => TRUE,
   );

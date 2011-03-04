@@ -352,11 +352,11 @@ function _agenda_parse_event($xml, $block) {
 
   // If the Date API is installed, we can do better at DST times
   if (module_exists('date_api')) {
-    $start               = date_make_date($event['start timestamp'], NULL, DATE_UNIX);
-    $event['start time'] = date_format_date($start, 'custom', $block->timeformat);
+    $start               = new DateObject($event['start timestamp']);
+    $event['start time'] = $start->format($block->timeformat);
 
-    $end                 = date_make_date($event['end timestamp'], NULL, DATE_UNIX);
-    $event['end time']   = date_format_date($end, 'custom', $block->timeformat);
+    $end                 = new DateObject($event['end timestamp']);
+    $event['end time']   = $end->format($block->timeformat);
   }
 
   // Hide the start and end times for full day events

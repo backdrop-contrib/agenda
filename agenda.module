@@ -3,7 +3,7 @@
 /**
  * The google calendar feed address
  */
-define('AGENDA_SOURCEPATTERN', 'http://www.google.com/calendar/feeds/%s/%s/full?hl=en&singleevents=true&sortorder=ascending&orderby=starttime&start-min=%s&start-max=%s&max-results=%d&ctz=UTC');
+define('AGENDA_SOURCEPATTERN', 'http://www.google.com/calendar/feeds/%s/%s/full?hl=en&singleevents=true&sortorder=ascending&orderby=starttime&start-min=%s&start-max=%s&max-results=%d&ctz=%s');
 
 
 /**
@@ -13,17 +13,17 @@ function agenda_menu() {
 
   $items = array();
 
-  $items['admin/config/content/agenda'] = array(
+  $items['admin/config/services/agenda'] = array(
     'title'            => 'Agenda',
     'type'             => MENU_NORMAL_ITEM,
-    'description'      => 'Create and manage agenda calendar blocks.',
+    'description'      => 'Create and configure agenda blocks which utilise Google Calendar\'s web service.',
     'page callback'    => 'agenda_admin',
     'page arguments'   => array('agenda_admin'),
     'access arguments' => array('configure agenda blocks'),
     'file'             => 'agenda.admin.php',
   );
 
-  $items['admin/config/content/agenda/%/configure'] = array(
+  $items['admin/config/services/agenda/%/configure'] = array(
     'title'            => 'Configure agenda block',
     'type'             => MENU_CALLBACK,
     'page callback'    => 'drupal_get_form',
@@ -32,7 +32,7 @@ function agenda_menu() {
     'file'             => 'agenda.admin.php',
   );
 
-  $items['admin/config/content/agenda/%/delete'] = array(
+  $items['admin/config/services/agenda/%/delete'] = array(
     'title'            => 'Delete agenda block',
     'type'             => MENU_CALLBACK,
     'page callback'    => 'drupal_get_form',
@@ -41,7 +41,7 @@ function agenda_menu() {
     'file'             => 'agenda.admin.php',
   );
 
-  $items['admin/config/content/agenda/%/debug'] = array(
+  $items['admin/config/services/agenda/%/debug'] = array(
     'title'            => 'Test settings',
     'type'             => MENU_CALLBACK,
     'page callback'    => 'agenda_debug',
@@ -50,7 +50,7 @@ function agenda_menu() {
     'file'             => 'agenda.admin.php',
   );
 
-  $items['admin/config/content/agenda/%/clear'] = array(
+  $items['admin/config/services/agenda/%/clear'] = array(
     'type'             => MENU_CALLBACK,
     'page callback'    => 'agenda_clear',
     'page arguments'   => array(4),
@@ -324,24 +324,32 @@ function agenda_get_events($block, $cache = TRUE) {
 function _agenda_parse_event($xml, $block) {
   $gd = $xml->children('http://schemas.google.com/g/2005');
 
+  // Work around a bug in Google Calendar which reports
+  //   dates as "<published>0001-12-30T19:04:00.000-04:56</published>"
+  $published = strtotime($xml->published);
+  if (!$published) {
+    $published = time();
+  }
+
   // Build up information about the event
   $event = array();
   $event['title']           = htmlspecialchars((string) $xml->title);
   $event['where']           = htmlspecialchars((string) $gd->where->attributes()->valueString);
   $event['description']     = _filter_autop(filter_xss((string) $xml->content));
+  $event['timezone']        = $block->timezone;
 
   $event['start original']  = (string) $gd->when->attributes()->startTime;
   $event['start timestamp'] = strtotime($gd->when->attributes()->startTime);
-  $event['start date']      = format_date($event['start timestamp'], $block->dateformat, $block->customdate);
-  $event['start time']      = format_date($event['start timestamp'], $block->dateformat, $block->timeformat);
+  $event['start date']      = format_date($event['start timestamp'], $block->dateformat, $block->customdate, $block->timezone);
+  $event['start time']      = format_date($event['start timestamp'], $block->dateformat, $block->timeformat, $block->timezone);
 
   $event['end original']    = (string) $gd->when->attributes()->endTime;
   $event['end timestamp']   = strtotime($gd->when->attributes()->endTime);
-  $event['end date']        = format_date($event['end timestamp'], $block->dateformat, $block->customdate);
-  $event['end time']        = format_date($event['end timestamp'], $block->dateformat, $block->timeformat);
+  $event['end date']        = format_date($event['end timestamp'], $block->dateformat, $block->customdate, $block->timezone);
+  $event['end time']        = format_date($event['end timestamp'], $block->dateformat, $block->timeformat, $block->timezone);
 
-  $event['published']       = format_date(strtotime($xml->published), $block->dateformat, $block->customdate);
-  $event['updated']         = format_date(strtotime($xml->updated), $block->dateformat, $block->customdate);
+  $event['published']       = format_date($published, $block->dateformat, $block->customdate, $block->timezone);
+  $event['updated']         = format_date(strtotime($xml->updated), $block->dateformat, $block->customdate, $block->timezone);
 
   $link                     = (array) $xml->link[0];
   $event['url']             = (string) $link['@attributes']['href'];
@@ -350,13 +358,12 @@ function _agenda_parse_event($xml, $block) {
   // The day the event occurs on (without time)
   $event['when']            = $event['start timestamp'] - $event['start timestamp'] % (24 * 3600);
 
-
   // If the Date API is installed, we can do better at DST times
   if (module_exists('date_api')) {
-    $start               = new DateObject($event['start timestamp']);
+    $start               = new DateObject($event['start timestamp'], $block->timezone);
     $event['start time'] = $start->format($block->timeformat);
 
-    $end                 = new DateObject($event['end timestamp']);
+    $end                 = new DateObject($event['end timestamp'], $block->timezone);
     $event['end time']   = $end->format($block->timeformat);
   }
 
@@ -398,6 +405,7 @@ function _agenda_translate($field) {
   $t['link']            = t('Link');
   $t['when']            = t('When');
   $t['calendar']        = t('Calendar');
+  $t['timezone']        = t('Timezone');
   return $t[$field];
 }
 
@@ -412,7 +420,6 @@ function _agenda_translate($field) {
  */
 function _agenda_load_xml($address, $key, $block) {
   $url = _agenda_feed_url($address, $key, $block);
-
   $xml = drupal_http_request($url);
 
   $data = FALSE;
@@ -439,7 +446,8 @@ function _agenda_feed_url($address, $key, $block) {
     urlencode(check_plain($key)),
     date('Y-m-d', strtotime($block->start)),
     date('Y-m-d', strtotime($block->end)),
-    $block->maxevents);
+    $block->maxevents,
+    $block->timezone);
 
   return $url;
 }

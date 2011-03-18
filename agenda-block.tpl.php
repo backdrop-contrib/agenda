@@ -18,7 +18,7 @@ $nolabel = array_map('trim', explode(',', $block->hide_labels));
 <div class="agenda-block">
   <?php foreach ($events as $day): ?>
   <?php
-  $date = format_date($day[0]['when'], $block->dateformat, $block->customdate);
+  $date = format_date($day[0]['when'], $block->dateformat, $block->customdate, $block->timezone);
 
   // Substitute today/yesterday/tomorrow
   if (isset($dates[$day[0]['when']])) {

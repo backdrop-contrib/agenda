@@ -23,10 +23,10 @@ function agenda_admin() {
   $rows = array();
   while ($row = $res->fetchObject()) {
     $actions = array(
-      'configure' => l(t('Configure'), sprintf('admin/config/content/agenda/%d/configure', $row->bid)),
-      'delete'    => l(t('Delete'), sprintf('admin/config/content/agenda/%d/delete', $row->bid)),
-      'debug'     => l(t('Debug'), sprintf('admin/config/content/agenda/%d/debug', $row->bid)),
-      'clear'     => l(t('Clear'), sprintf('admin/config/content/agenda/%d/clear', $row->bid)),
+      'configure' => l(t('Configure'), sprintf('admin/config/services/agenda/%d/configure', $row->bid)),
+      'delete'    => l(t('Delete'), sprintf('admin/config/services/agenda/%d/delete', $row->bid)),
+      'debug'     => l(t('Debug'), sprintf('admin/config/services/agenda/%d/debug', $row->bid)),
+      'clear'     => l(t('Clear'), sprintf('admin/config/services/agenda/%d/clear', $row->bid)),
     );
 
     $rows[] = array(
@@ -85,7 +85,7 @@ function agenda_admin_delete_submit($form, $form_state) {
     ->execute();
 
   drupal_set_message('Agenda block was deleted');
-  drupal_goto('admin/config/content/agenda');
+  drupal_goto('admin/config/services/agenda');
 }
 
 
@@ -226,6 +226,15 @@ function agenda_admin_configure($form, $form_state, $delta) {
     '#agenda_setting' => TRUE,
   );
 
+  $form['agenda_timezone'] = array(
+    '#type'           => 'textfield',
+    '#title'          => t('Timezone'),
+    '#default_value'  => agenda_variable_get($delta, 'timezone', variable_get('date_default_timezone', date_default_timezone_get())),
+    '#description'    => t('The timezone identifier to be used for this calendar, as described in <a href="http://php.net/timezones">the PHP manual</a>.'),
+    '#required'       => TRUE,
+    '#agenda_setting' => TRUE,
+  );
+
   $form['agenda_confirm'] = array(
     '#type'           => 'submit',
     '#value'          => t('Save settings'),
@@ -285,6 +294,12 @@ function agenda_admin_configure_validate($form, &$form_state) {
   elseif ($cachetime <= 0) {
     form_set_error('agenda_cachetime', t('The cache time must be positive.'));
   }
+
+
+  // timezone
+  if (!@date_default_timezone_set($form_state['values']['agenda_timezone'])) {
+    form_set_error('agenda_timezone', t('Invalid timezone.'));
+  }
 }
 
 
@@ -309,7 +324,7 @@ function agenda_admin_configure_submit($form, $form_state) {
   }
 
   drupal_set_message('Block settings were saved successfully');
-  drupal_goto('admin/config/content/agenda');
+  drupal_goto('admin/config/services/agenda');
 }
 
 
@@ -460,5 +475,5 @@ function agenda_debug_ntp_time($host) {
 function agenda_clear($bid) {
   drupal_set_message(t('Cache cleared for agenda block'));
   cache_clear_all('agenda_block_' . $bid, 'cache');
-  drupal_goto('admin/config/content/agenda');
+  drupal_goto('admin/config/services/agenda');
 }

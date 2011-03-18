@@ -34,6 +34,7 @@ function agenda_install_fixtures() {
     array(1, 'display_keys', 'start time, end date, end time, published, description, link'),
     array(1, 'hide_labels',  'description, link'),
     array(1, 'calendars',    'drupalagenda@gmail.com'),
+    array(1, 'timezone',     'UTC'),
   );
 
   $query = db_insert('agenda')

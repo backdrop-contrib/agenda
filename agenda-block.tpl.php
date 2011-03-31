@@ -7,9 +7,9 @@
 
 // Build some neat dates
 $today = time() - time() % (3600 * 24);
-$dates[$today]         = t('Today');
-$dates[$today - 86400] = t('Yesterday');
-$dates[$today + 86400] = t('Tomorrow');
+$dates[date('Y-m-d', $today)]         = t('Today');
+$dates[date('Y-m-d', $today - 86400)] = t('Yesterday');
+$dates[date('Y-m-d', $today + 86400)] = t('Tomorrow');
 
 // List of keys to display
 $keys    = array_map('trim', explode(',', $block->display_keys));
@@ -18,7 +18,7 @@ $nolabel = array_map('trim', explode(',', $block->hide_labels));
 <div class="agenda-block">
   <?php foreach ($events as $day): ?>
   <?php
-  $date = format_date($day[0]['when'], $block->dateformat, $block->customdate, $block->timezone);
+  $date = $day[0]['start date'];
 
   // Substitute today/yesterday/tomorrow
   if (isset($dates[$day[0]['when']])) {

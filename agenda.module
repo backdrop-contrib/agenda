@@ -324,11 +324,20 @@ function agenda_get_events($block, $cache = TRUE) {
 function _agenda_parse_event($xml, $block) {
   $gd = $xml->children('http://schemas.google.com/g/2005');
 
+  // Timezone
+  $tz = new DateTimeZone($block->timezone);
+
+  // Parse the timestamps
+  $updated = new DateTime($xml->updated, $tz);
+  $start   = new DateTime((string) $gd->when->attributes()->startTime, $tz);
+  $end     = new DateTime((string) $gd->when->attributes()->endTime, $tz);
+
   // Work around a bug in Google Calendar which reports
   //   dates as "<published>0001-12-30T19:04:00.000-04:56</published>"
-  $published = strtotime($xml->published);
-  if (!$published) {
-    $published = time();
+  try {
+    $published = new DateTime((string) $xml->published, $tz);
+  } catch (Exception $e) {
+    $published = new DateTime('now', $tz);
   }
 
   // Build up information about the event
@@ -339,33 +348,24 @@ function _agenda_parse_event($xml, $block) {
   $event['timezone']        = $block->timezone;
 
   $event['start original']  = (string) $gd->when->attributes()->startTime;
-  $event['start timestamp'] = strtotime($gd->when->attributes()->startTime);
-  $event['start date']      = format_date($event['start timestamp'], $block->dateformat, $block->customdate, $block->timezone);
-  $event['start time']      = format_date($event['start timestamp'], $block->dateformat, $block->timeformat, $block->timezone);
+  $event['start date']      = $start->format($block->dateformat);
+  $event['start time']      = $start->format($block->timeformat);
+  $event['start timestamp'] = strtotime($start->format('c')); // Use strtotime instead of getTimestamp for < PHP5.3
 
   $event['end original']    = (string) $gd->when->attributes()->endTime;
-  $event['end timestamp']   = strtotime($gd->when->attributes()->endTime);
-  $event['end date']        = format_date($event['end timestamp'], $block->dateformat, $block->customdate, $block->timezone);
-  $event['end time']        = format_date($event['end timestamp'], $block->dateformat, $block->timeformat, $block->timezone);
+  $event['end date']        = $end->format($block->dateformat);
+  $event['end time']        = $end->format($block->timeformat);
+  $event['end timestamp']   = strtotime($end->format('c'));
 
-  $event['published']       = format_date($published, $block->dateformat, $block->customdate, $block->timezone);
-  $event['updated']         = format_date(strtotime($xml->updated), $block->dateformat, $block->customdate, $block->timezone);
+  $event['published']       = $published->format($block->dateformat);
+  $event['updated']         = $updated->format($block->dateformat);
 
   $link                     = (array) $xml->link[0];
   $event['url']             = (string) $link['@attributes']['href'];
   $event['link']            = l($block->linktext, $event['url']);
 
-  // The day the event occurs on (without time)
-  $event['when']            = $event['start timestamp'] - $event['start timestamp'] % (24 * 3600);
-
-  // If the Date API is installed, we can do better at DST times
-  if (module_exists('date_api')) {
-    $start               = new DateObject($event['start timestamp'], $block->timezone);
-    $event['start time'] = $start->format($block->timeformat);
-
-    $end                 = new DateObject($event['end timestamp'], $block->timezone);
-    $event['end time']   = $end->format($block->timeformat);
-  }
+  // The day the event occurs on (without time) used for grouping
+  $event['when']            = $start->format('Y-m-d');
 
   // Hide the start and end times for full day events
   if (strlen($gd->when->attributes()->startTime) === 10) {

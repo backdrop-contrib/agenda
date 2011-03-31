@@ -148,27 +148,18 @@ function agenda_admin_configure($form, $form_state, $delta) {
 
   $form['agenda_dateformat'] = array(
     '#type'           => 'textfield',
-    '#title'          => t('Format of the dates displayed'),
-    '#default_value'  => agenda_variable_get($delta, 'dateformat', 'custom'),
-    '#description'    => t('The first parameter provided to <a href="http://api.drupal.org/api/search/7/format_date">format_date</a>; small, medium, large or custom.'),
+    '#title'          => t('Date formatting'),
+    '#default_value'  => agenda_variable_get($delta, 'dateformat', 'l, F jS'),
+    '#description'    => t('Specify the date format.'),
     '#required'       => TRUE,
-    '#agenda_setting' => TRUE,
-  );
-
-  $form['agenda_customdate'] = array(
-    '#type'           => 'textfield',
-    '#title'          => t('Custom date formatting'),
-    '#default_value'  => agenda_variable_get($delta, 'customdate', 'l, F jS'),
-    '#description'    => t('If you have specified <em>custom</em> above, then specify the date format here.'),
-    '#required'       => FALSE,
     '#agenda_setting' => TRUE,
   );
 
   $form['agenda_timeformat'] = array(
     '#type'           => 'textfield',
-    '#title'          => t('Format of the times displayed'),
+    '#title'          => t('Time formatting'),
     '#default_value'  => agenda_variable_get($delta, 'timeformat', 'h:ia'),
-    '#description'    => t('If start and finish times are displayed, specify the time format here.'),
+    '#description'    => t('Specify the time format.'),
     '#required'       => TRUE,
     '#agenda_setting' => TRUE,
   );
@@ -400,10 +391,10 @@ function agenda_debug($bid) {
     ));
 
   foreach ($eventdata as $key => $event) {
-    if ($event['when'] < $what_is_old_ts) {
-      $output[] = t('&raquo; Discarding %title because %when is older than %old', array(
+    if ($event['start timestamp'] < $what_is_old_ts) {
+      $output[] = t('&raquo; Discarding %title because %start is older than %old', array(
         '%title' => $event['title'],
-        '%when'  => format_date($event['when'], 'small'),
+        '%start'  => format_date($event['start timestamp'], 'small'),
         '%old'   => format_date($what_is_old_ts, 'small')
         ));
       unset($eventdata[$key]);

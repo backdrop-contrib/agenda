@@ -22,8 +22,7 @@ function agenda_install_fixtures() {
   $records = array(
     array(1, 'noeventstext', '<p>No upcoming events</p>'),
     array(1, 'timeformat',   'h:ia'),
-    array(1, 'customdate',   'l, F jS'),
-    array(1, 'dateformat',   'custom'),
+    array(1, 'dateformat',   'l, F jS'),
     array(1, 'maxevents',    '60'),
     array(1, 'datelimit',    '60'),
     array(1, 'start',        'Jan 1st, 2009'),

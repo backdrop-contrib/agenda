@@ -6,3 +6,4 @@ dependencies[] = block
 files[] = agenda.admin.php
 files[] = agenda.install
 files[] = agenda.module
+files[] = agenda.test

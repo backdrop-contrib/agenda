@@ -5,13 +5,12 @@
  * Template for displaying the agenda in a block
  */
 
-// Build some neat dates
-$today = time() - time() % (3600 * 24);
-$dates[date('Y-m-d', $today)]         = t('Today');
-$dates[date('Y-m-d', $today - 86400)] = t('Yesterday');
-$dates[date('Y-m-d', $today + 86400)] = t('Tomorrow');
+// Build some neat dates.
+$dates[date('Y-m-d', mktime(0, 0, 0, date("m"), date("d") - 1))] = t('Yesterday');
+$dates[date('Y-m-d', mktime(0, 0, 0))] = t('Today');
+$dates[date('Y-m-d', mktime(0, 0, 0, date("m"), date("d") + 1))] = t('Tomorrow');
 
-// List of keys to display
+// List of keys to display.
 $keys    = array_map('trim', explode(',', $block->display_keys));
 $nolabel = array_map('trim', explode(',', $block->hide_labels));
 ?>
@@ -20,7 +19,7 @@ $nolabel = array_map('trim', explode(',', $block->hide_labels));
   <?php
   $date = $day[0]['start date'];
 
-  // Substitute today/yesterday/tomorrow
+  // Substitute today/yesterday/tomorrow.
   if (isset($dates[$day[0]['when']])) {
     $date = $dates[$day[0]['when']];
   }

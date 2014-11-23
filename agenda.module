@@ -270,7 +270,7 @@ function agenda_get_events($block, $cache = TRUE) {
   $eventdata = array();
   foreach ($calendars as $calindex => $googleid) {
     list ($address, $token) = _agenda_parse_googleid($googleid);
-    $calendar = _agenda_load_google($address);
+    $calendar = _agenda_load_google($address, $token, $block);
 
     // If we fail to load the XML, handle it
     if (!$calendar) {

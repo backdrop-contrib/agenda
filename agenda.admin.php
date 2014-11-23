@@ -90,6 +90,23 @@ function agenda_admin_delete_submit($form, $form_state) {
 
 
 /**
+ * Set Google API Key
+ */
+function agenda_admin_googleapi($form, &$form_state){
+  $form['agenda_googleapi'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Google API Key'),
+    '#default_value' => variable_get('agenda_googleapi', ''),
+    '#size' => 39,
+    '#maxlength' => 39,
+    '#description' => t('Key for server applications - <a href="https://developers.google.com/console/help/new/#usingkeys">https://developers.google.com/console/help/new/#usingkeys</a>'),
+    '#required' => TRUE,
+  );
+  return system_settings_form($form);
+}
+
+
+/**
  * Manage agenda
  */
 function agenda_admin_configure($form, $form_state, $delta) {
@@ -323,6 +340,7 @@ function agenda_admin_configure_submit($form, $form_state) {
  * Provide a page to debug a calendar ID that is not working
  */
 function agenda_debug($bid) {
+  /*
   $output     = array();
 
   // Date check (http://drupal.org/node/545174)
@@ -425,6 +443,7 @@ function agenda_debug($bid) {
     'event_table' => array('#markup' => $event_table, '#prefix' => '<h3>Events</h3><div id="agenda-debug-table">', '#suffix' => '</div>'),
     '#attached'   => array('css' => array(drupal_get_path('module', 'agenda') . '/agenda.css')),
   );
+  */
 }
 
 

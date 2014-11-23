@@ -391,23 +391,17 @@ function agenda_debug($bid) {
 
   // Load the calendar
   list ($address, $token) = _agenda_parse_googleid($googleid);
-  // $source = _agenda_feed_url($address, $token, $block);
-  // $output[] = t('Fetching feed from <em>%source</em>', array('%source' => $source));
 
   // Load the XML
-  // $calendar = _agenda_load_xml($address, $token, $block);
   $calendar = _agenda_load_google($address, $token, $block);
   if (!$calendar) {
-    // $output[] = t('<strong>Warning</strong>: Failed to load XML');
     $output[] = t('<strong>Warning</strong>: Failed');
     return theme('item_list', $output, NULL, 'ul', array('id' => 'agenda-debug'));
   }
-  // $output[] = t('Loaded XML successfully');
   $output[] = t('Loaded Calendar successfully');
 
   // Find the events
   $calendar_events = $calendar->getItems();
-  // $number_of_events = count($calendar->entry);
   $number_of_events = count($calendar_events);
   $output[] = t('Found @count events', array('@count' => $number_of_events));
   if ($number_of_events === 0) {
@@ -424,9 +418,6 @@ function agenda_debug($bid) {
   $i = 0;
   $eventdata = array();
   foreach ($calendar_events as $event) {
-    // $output[] = t('Loading event @number which is @size bytes', array('@number' => ++$i, '@size' => strlen($event->asXml())));
-    // $output[] = sprintf("<pre>%s</pre>", htmlspecialchars($event->asXml()));
-
     $thisevent = _agenda_parse_event($event, $block);
     if (!$thisevent) {
       $output[] = t('<strong>Warning</strong>: Failed to parse event!');

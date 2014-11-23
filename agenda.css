@@ -27,4 +27,4 @@
 #agenda-debug-log ul li { margin: 0; padding: .5em; list-style: none; background-color: #ddd; }
 #agenda-debug-log ul li:nth-child(odd) { background-color: white; }
 #agenda-debug-log ul li pre { overflow: auto; }
-#agenda-debug-table { max-width: 100%; max-height: 500px; border: 2px solid #666; overflow: auto; }
+/*#agenda-debug-table { max-width: 100%; max-height: 500px; border: 2px solid #666; overflow: auto; }*/

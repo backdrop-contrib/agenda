@@ -399,8 +399,10 @@ function _agenda_parse_event($google_response, $block) {
 
   // Parse the timestamps
   $updated = new DateTime($google_response->updated, $tz);
+  //check if event is all day by looking from dateTime
   $start   = new DateTime((string) ($google_response->start->dateTime) ? $google_response->start->dateTime : $google_response->start->date , $tz);
-  $end     = new DateTime((string) ($google_response->end->dateTime) ? $google_response->end->dateTime : $google_response->end->date, $tz);
+  //need to minus 1 day from end date for all day events because end time is exclusive - https://developers.google.com/google-apps/calendar/v3/reference/events
+  $end     = new DateTime((string) ($google_response->end->dateTime) ? $google_response->end->dateTime : date('Y-m-d', strtotime($google_response->end->date." -1 day")), $tz);
 
   $event = array();
   $event['title']           = htmlspecialchars((string) $google_response->summary);
@@ -430,15 +432,20 @@ function _agenda_parse_event($google_response, $block) {
   $event['when']            = $start->format('Y-m-d');
 
   //new fields added for google api v3.
-  $event['event id']         = $google_response->id;
-  $event['hangout url']      = $google_response->hangoutLink;
-  $event['hangout link']     = l($block->hangoutlinktext, $event['hangout url']);
-  $event['iCalUID']          = $google_response->iCalUID;
-  $event['recurrence']       = $google_response->recurrence;
-  $event['recurringEventId'] = $google_response->recurringEventId;
+  $event['event id']               = $google_response->id;
+  $event['hangout url']            = $google_response->hangoutLink;
+  $event['hangout link']           = l($block->hangoutlinktext, $event['hangout url']);
+  $event['iCalUID']                = $google_response->iCalUID;
+  $event['recurringEventId']       = $google_response->recurringEventId;
+  $event['creator email']          = $google_response->creator->email;
+  $event['creator displayName']    = $google_response->creator->displayName;
+  $event['organizer email']        = $google_response->organizer->email;
+  $event['organizer displayName']  = $google_response->organizer->displayName;
 
   if($google_response->start->date){ $event['start time'] = ''; }
   if($google_response->end->date){   $event['end time']   = ''; }
+
+  if($google_response->start->date && $google_response->end->date){ $event['allday'] = true; }
 
   return $event;
 }
@@ -450,30 +457,33 @@ function _agenda_parse_event($google_response, $block) {
  * provides a wrapper for this.
  */
 function _agenda_translate($field) {
-  $t['title']           = t('Title');
-  $t['where']           = t('Where');
-  $t['description']     = t('Description');
-  $t['start original']  = t('Start original');
-  $t['start timestamp'] = t('Start timestamp');
-  $t['start date']      = t('Start date');
-  $t['start time']      = t('Start time');
-  $t['end original']    = t('End original');
-  $t['end timestamp']   = t('End timestamp');
-  $t['end date']        = t('End date');
-  $t['end time']        = t('End time');
-  $t['published']       = t('Published');
-  $t['updated']         = t('Updated');
-  $t['url']             = t('URL');
-  $t['link']            = t('Link');
-  $t['when']            = t('When');
-  $t['calendar']        = t('Calendar');
-  $t['timezone']        = t('Timezone');
-  $t['event id']        = t('Event ID');
-  $t['hangout url']     = t('Hangout URL');
-  $t['hangout link']    = t('Hangout link');
-  $t['iCalUID']         = t('iCal UID');
-  $t['recurrence']      = t('Recurrence');
-  $t['recurringEventId']= t('Recurring Event ID');
+  $t['title']                 = t('Title');
+  $t['where']                 = t('Where');
+  $t['description']           = t('Description');
+  $t['start original']        = t('Start original');
+  $t['start timestamp']       = t('Start timestamp');
+  $t['start date']            = t('Start date');
+  $t['start time']            = t('Start time');
+  $t['end original']          = t('End original');
+  $t['end timestamp']         = t('End timestamp');
+  $t['end date']              = t('End date');
+  $t['end time']              = t('End time');
+  //$t['published']           = t('Published');
+  $t['updated']               = t('Updated');
+  $t['url']                   = t('URL');
+  $t['link']                  = t('Link');
+  $t['when']                  = t('When');
+  $t['calendar']              = t('Calendar');
+  $t['timezone']              = t('Timezone');
+  $t['event id']              = t('Event ID');
+  $t['hangout url']           = t('Hangout URL');
+  $t['hangout link']          = t('Hangout link');
+  $t['iCalUID']               = t('iCal UID');
+  $t['recurringEventId']      = t('Recurring Event ID');
+  $t['creator email']         = t('Creator Email');
+  $t['creator displayName']   = t('Creator Display Name');
+  $t['organizer email']       = t('Organizer Email');
+  $t['organizer displayName'] = t('Organizer Display Name');
   return $t[$field];
 }
 

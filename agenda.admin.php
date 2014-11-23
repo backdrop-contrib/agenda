@@ -367,6 +367,7 @@ function agenda_debug($bid) {
 
   // Find calendar sources
   $block      = agenda_settings($bid);
+  $debug_title = array('#markup' => '<h2>' . t('Debugging %calendar block', array('%calendar' => $block->title)) . ' - '.l('Edit','admin/config/services/agenda/'.$bid.'/configure',array('query' => drupal_get_destination())).'</h2>');
   $output[]   = t('Reading calendar input:');
   $output[]   = '<pre>' . htmlspecialchars($block->calendars) . '</pre>';
   $calendars  = preg_split('@\r\n?|\n@', $block->calendars);
@@ -469,13 +470,13 @@ function agenda_debug($bid) {
     $event_table = theme('table', array(
       'header' => array_keys($first_row[0]),
       'rows'   => $eventdata,
-      'sticky' => FALSE,
+      'sticky' => TRUE,
     ));
   }
 
   // Render
   return array(
-    'title'       => array('#markup' => '<h2>' . t('Debugging %calendar block', array('%calendar' => $block->title)) . '</h2>'),
+    'title'       => $debug_title,
     'debug_log'   => array('#markup' => $debug_log, '#prefix' => '<h3>Log</h3><div id="agenda-debug-log">', '#suffix' => '</div>'),
     'event_table' => array('#markup' => $event_table, '#prefix' => '<h3>Events</h3><div id="agenda-debug-table">', '#suffix' => '</div>'),
     '#attached'   => array('css' => array(drupal_get_path('module', 'agenda') . '/agenda.css')),

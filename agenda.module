@@ -424,11 +424,18 @@ function _agenda_parse_event($google_response, $block) {
 
   //$link                     = (array) $google_response->htmlLink;
   $event['url']             = (string) $google_response->htmlLink;
-  $event['link']            = l($block->linktext, $event['url'].'&ctz=America/New_York');
+  $event['link']            = l($block->linktext, $event['url'].'&ctz='.$block->timezone);
 
   // The day the event occurs on (without time) used for grouping
   $event['when']            = $start->format('Y-m-d');
 
+  //new fields added for google api v3.
+  $event['event id']         = $google_response->id;
+  $event['hangout url']      = $google_response->hangoutLink;
+  $event['hangout link']     = l($block->hangoutlinktext, $event['hangout url']);
+  $event['iCalUID']          = $google_response->iCalUID;
+  $event['recurrence']       = $google_response->recurrence;
+  $event['recurringEventId'] = $google_response->recurringEventId;
 
   if($google_response->start->date){ $event['start time'] = ''; }
   if($google_response->end->date){   $event['end time']   = ''; }
@@ -461,6 +468,12 @@ function _agenda_translate($field) {
   $t['when']            = t('When');
   $t['calendar']        = t('Calendar');
   $t['timezone']        = t('Timezone');
+  $t['event id']        = t('Event ID');
+  $t['hangout url']     = t('Hangout URL');
+  $t['hangout link']    = t('Hangout link');
+  $t['iCalUID']         = t('iCal UID');
+  $t['recurrence']      = t('Recurrence');
+  $t['recurringEventId']= t('Recurring Event ID');
   return $t[$field];
 }
 
@@ -487,8 +500,10 @@ function _agenda_load_xml($address, $key, $block) {
 }
 */
 
-function _agenda_load_google($address) {
+function _agenda_load_google($address, $key, $block) {
+
   $calendar_id = $address;
+  $googlekey = (!empty($block->googleapi_override)) ? $block->googleapi_override : variable_get('agenda_googleapi', '');
 
   //Including the google-api-php-client library (required).
   $autoload_path = libraries_get_path('google-api-php-client') . '/autoload.php';
@@ -501,20 +516,24 @@ function _agenda_load_google($address) {
   // https://developers.google.com/google-apps/calendar/v3/reference
   $client = new Google_Client();
   $client->setApplicationName('agenda_events_feed');
-  $client->setDeveloperKey(variable_get('agenda_googleapi', ''));
+  $client->setDeveloperKey($googlekey);
 
   $service = new Google_Service_Calendar($client);
   $optParams = array(
     'orderBy' => 'startTime',
     'singleEvents' => 'true',
-    'timeMin' => date('Y-m-d') . 'T00:00:00' . date('P'),
+    'timeMin' => date('Y-m-d', strtotime($block->start)) . 'T00:00:00' . date('P'),
+    'timeMax' => date('Y-m-d', strtotime($block->end)) . 'T00:00:00' . date('P'),
+    'maxResults' => $block->maxevents,
+    'timeZone' => $block->timezone,
   );
 
   try {
     $events = $service->events->listEvents($calendar_id, $optParams);
   }
   catch (Exception $e) {
-    drupal_set_message(t('Agenda: Bad call to list events. Check Google API Key'), 'error');
+    drupal_set_message(t('Agenda: Bad call to list events. Check Google API Key or Calendar Address.'), 'error');
+    drupal_set_message('<pre>'.$e.'</pre>', 'error');
     return;
   }
 

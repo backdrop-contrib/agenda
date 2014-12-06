@@ -21,19 +21,20 @@ function agenda_install() {
 function agenda_install_fixtures() {
   $records = array(
     array(1, 'noeventstext', '<p>No upcoming events</p>'),
-    array(1, 'timeformat',   'h:ia'),
-    array(1, 'dateformat',   'l, F jS'),
-    array(1, 'maxevents',    '60'),
-    array(1, 'datelimit',    '60'),
-    array(1, 'start',        'Jan 1st, 2009'),
-    array(1, 'end',          'April 1st, 2009'),
-    array(1, 'title',        'Example agenda block'),
-    array(1, 'linktext',     'View this event in Google Calendar'),
-    array(1, 'cachetime',    '3600'),
+    array(1, 'timeformat', 'h:ia'),
+    array(1, 'dateformat', 'l, F jS'),
+    array(1, 'maxevents', '60'),
+    array(1, 'datelimit', '60'),
+    array(1, 'start', 'Jan 1st, 2009'),
+    array(1, 'end', 'April 1st, 2009'),
+    array(1, 'title', 'Example agenda block'),
+    array(1, 'linktext', 'View this event in Google Calendar'),
+    array(1, 'hangoutlinktext', 'Join Google Calendar Event Hangout'),
+    array(1, 'cachetime', '3600'),
     array(1, 'display_keys', 'start time, end date, end time, published, description, link'),
-    array(1, 'hide_labels',  'description, link'),
-    array(1, 'calendars',    'drupalagenda@gmail.com'),
-    array(1, 'timezone',     'UTC'),
+    array(1, 'hide_labels', 'description, link'),
+    array(1, 'calendars', 'drupalagenda@gmail.com'),
+    array(1, 'timezone', 'UTC'),
   );
 
   $query = db_insert('agenda')

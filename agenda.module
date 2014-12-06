@@ -358,7 +358,7 @@ function _agenda_parse_event($google_response, $block) {
   //new fields added for google api v3.
   $event['event id']               = $google_response->id;
   $event['hangout url']            = $google_response->hangoutLink;
-  $event['hangout link']           = l($block->hangoutlinktext, $event['hangout url']);
+  $event['hangout link']           = !empty($block->hangoutlinktext) ? l($block->hangoutlinktext, $event['hangout url']) : NULL;
   $event['iCalUID']                = $google_response->iCalUID;
   $event['recurringEventId']       = $google_response->recurringEventId;
   $event['creator email']          = $google_response->creator->email;

@@ -348,17 +348,17 @@ function _agenda_parse_event($google_response, $block) {
   $event['timezone']        = $block->timezone;
 
   $event['start original']  = (string) $google_response->start->dateTime;
-  $event['start date']      = $start->format($block->dateformat);
-  $event['start time']      = $start->format($block->timeformat);
+  $event['start date']      = format_date(strtotime($start->format('c')), 'custom', $block->dateformat, $block->timezone);
+  $event['start time']      = format_date(strtotime($start->format('c')), 'custom', $block->timeformat, $block->timezone);
   $event['start timestamp'] = strtotime($start->format('c')); // Use strtotime instead of getTimestamp for < PHP5.3
 
   $event['end original']    = (string) $google_response->end->dateTime;
-  $event['end date']        = $end->format($block->dateformat);
-  $event['end time']        = $end->format($block->timeformat);
+  $event['end date']        = format_date(strtotime($end->format('c')), 'custom', $block->dateformat, $block->timezone);
+  $event['end time']        = format_date(strtotime($end->format('c')), 'custom', $block->timeformat, $block->timezone);
   $event['end timestamp']   = strtotime($end->format('c'));
 
   // Published date and time are not available in v3.
-  $event['updated']         = $updated->format($block->dateformat);
+  $event['updated']         = format_date(strtotime($updated->format('c')), 'custom', $block->dateformat, $block->timezone);
 
   $event['url']             = (string) $google_response->htmlLink;
   $event['link']            = l($block->linktext, $event['url'].'&ctz='.$block->timezone);

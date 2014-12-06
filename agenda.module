@@ -41,13 +41,14 @@ function agenda_menu() {
   );
 
   $items['admin/config/services/agenda/%/configure'] = array(
-    'title'            => 'Configure agenda block',
+    'title'            => 'Configure agenda block settings',
     'type'             => MENU_LOCAL_ACTION,
     'context'          => MENU_CONTEXT_INLINE,
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('agenda_admin_configure', 4),
     'access arguments' => array('configure agenda blocks'),
     'file'             => 'agenda.admin.php',
+    'weight'           => -4,
   );
 
   $items['admin/config/services/agenda/%/delete'] = array(
@@ -57,6 +58,7 @@ function agenda_menu() {
     'page arguments'   => array('agenda_admin_delete', 4),
     'access arguments' => array('configure agenda blocks'),
     'file'             => 'agenda.admin.php',
+    'weight'           => -3,
   );
 
   $items['admin/config/services/agenda/%/debug'] = array(
@@ -67,16 +69,18 @@ function agenda_menu() {
     'page arguments'   => array(4),
     'access arguments' => array('configure agenda blocks'),
     'file'             => 'agenda.admin.php',
+    'weight'           => -2,
   );
 
   $items['admin/config/services/agenda/%/clear'] = array(
-    'title'            => 'Clear agenda block',
+    'title'            => 'Clear agenda block cache',
     'type'             => MENU_LOCAL_ACTION,
     'context'          => MENU_CONTEXT_INLINE,
     'page callback'    => 'agenda_clear',
     'page arguments'   => array(4),
     'access arguments' => array('configure agenda blocks'),
     'file'             => 'agenda.admin.php',
+    'weight'           => -1,
   );
 
   return $items;
@@ -131,7 +135,9 @@ function agenda_block_view($delta) {
   return array(
     'subject' => t('Agenda'),
     'content' => array(
-      '#contextual_links' => array('agenda'=>array('admin/config/services/agenda',array($delta))),
+      '#contextual_links' => array(
+        'agenda' => array('admin/config/services/agenda', array($delta)),
+      ),
       '#markup'   => $markup,
       '#attached' => array(
         'css' => array($basepath . '/agenda.css'),

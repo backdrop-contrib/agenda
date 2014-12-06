@@ -386,7 +386,7 @@ function agenda_debug($bid) {
   $output[] = t('Maximum number of events to fetch: %maxEvents',array('%maxEvents' => $block->maxevents));
   $output[] = t('Timezone: %timezone',array('%timezone' => $block->timezone));
 
-  $googlekey = ($block->googleapi_override) ? $block->googleapi_override : variable_get('agenda_googleapi', '');
+  $googlekey = !empty($block->googleapi_override) ? $block->googleapi_override : variable_get('agenda_googleapi', '');
   $output[] = t('Using Google API Key: %googlekey',array('%googlekey' => $googlekey));
 
   // Load the calendar

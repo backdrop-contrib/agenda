@@ -42,7 +42,8 @@ function agenda_menu() {
 
   $items['admin/config/services/agenda/%/configure'] = array(
     'title'            => 'Configure agenda block',
-    'type'             => MENU_CALLBACK,
+    'type'             => MENU_LOCAL_ACTION,
+    'context'          => MENU_CONTEXT_INLINE,
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('agenda_admin_configure', 4),
     'access arguments' => array('configure agenda blocks'),
@@ -59,8 +60,9 @@ function agenda_menu() {
   );
 
   $items['admin/config/services/agenda/%/debug'] = array(
-    'title'            => 'Test settings',
-    'type'             => MENU_CALLBACK,
+    'title'            => 'Debug agenda block',
+    'type'             => MENU_LOCAL_ACTION,
+    'context'          => MENU_CONTEXT_INLINE,
     'page callback'    => 'agenda_debug',
     'page arguments'   => array(4),
     'access arguments' => array('configure agenda blocks'),
@@ -68,7 +70,9 @@ function agenda_menu() {
   );
 
   $items['admin/config/services/agenda/%/clear'] = array(
-    'type'             => MENU_CALLBACK,
+    'title'            => 'Clear agenda block',
+    'type'             => MENU_LOCAL_ACTION,
+    'context'          => MENU_CONTEXT_INLINE,
     'page callback'    => 'agenda_clear',
     'page arguments'   => array(4),
     'access arguments' => array('configure agenda blocks'),
@@ -127,6 +131,7 @@ function agenda_block_view($delta) {
   return array(
     'subject' => t('Agenda'),
     'content' => array(
+      '#contextual_links' => array('agenda'=>array('admin/config/services/agenda',array($delta))),
       '#markup'   => $markup,
       '#attached' => array(
         'css' => array($basepath . '/agenda.css'),

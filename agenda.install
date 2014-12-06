@@ -16,6 +16,14 @@ function agenda_install() {
 
 
 /**
+ * Implements hook_uninstall().
+ */
+function agenda_uninstall() {
+  variable_del('agenda_googleapi');
+}
+
+
+/**
  * Install an example block
  */
 function agenda_install_fixtures() {

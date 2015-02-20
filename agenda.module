@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * The default path to the Colorbox directory.
+ */
+define('AGENDA_MIN_API_VERSION', '1.1.2');
+
+/**
  * Implements hook_menu().
  */
 function agenda_menu() {
@@ -101,6 +106,33 @@ function agenda_permission() {
       'description' => t('Create and edit Agenda blocks'),
     ),
   );
+}
+
+
+/**
+ * Implements hook_libraries_info().
+ */
+function agenda_libraries_info() {
+  $libraries['google-api-php-client'] = array(
+    'name' => 'Google API Client Library for PHP',
+    'vendor url' => 'https://github.com/google/google-api-php-client',
+    'download url' => 'https://github.com/google/google-api-php-client/archive/1.1.2.zip',
+    'version arguments' => array(
+      'file' => 'src/Google/Client.php',
+      'pattern' => '/LIBVER = "([0-9\.a-z]+)/',
+      'lines' => 29,
+    ),
+    'versions' => array(
+      AGENDA_MIN_API_VERSION => array(),
+    ),
+    'files' => array(
+      'php' => array(
+        'src/Google/Client.php',
+      ),
+    ),
+  );
+
+  return $libraries;
 }
 
 
@@ -440,7 +472,9 @@ function _agenda_load_google($address, $key, $block) {
   //Including the google-api-php-client library (required).
   $autoload_path = libraries_get_path('google-api-php-client') . '/autoload.php';
   if (!file_exists($autoload_path)) {
-    drupal_set_message('Agenda: The google-api-php-client library was not found.', 'error');
+    drupal_set_message('Agenda: The google-api-php-client library was not found.
+      See admin/reports/status and/or the Agenda module\'s README for more
+      information.', 'error');
     return;
   }
   include_once($autoload_path);

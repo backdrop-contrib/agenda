@@ -156,6 +156,10 @@ function agenda_block_info() {
  * Implements hook_block_view().
  */
 function agenda_block_view($delta) {
+  if (!user_access('access agenda content')) {
+    return FALSE;
+  }
+
   // Load the block and do a sanity check
   $markup = agenda_display_block($delta);
   if (!$markup) {

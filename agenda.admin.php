@@ -84,8 +84,8 @@ function agenda_admin_delete_submit($form, $form_state) {
     ->condition('module', 'agenda')
     ->execute();
 
-  drupal_set_message('Agenda block was deleted');
-  drupal_goto('admin/config/services/agenda');
+  backdrop_set_message('Agenda block was deleted');
+  backdrop_goto('admin/config/services/agenda');
 }
 
 
@@ -96,13 +96,32 @@ function agenda_admin_googleapi($form, &$form_state){
   $form['agenda_googleapi'] = array(
     '#type' => 'textfield',
     '#title' => t('Google API Key'),
-    '#default_value' => variable_get('agenda_googleapi', ''),
+    '#default_value' => config_get('agenda.settings','agenda_googleapi'),
     '#size' => 39,
     '#maxlength' => 39,
     '#description' => t('Key for server applications - <a href="https://developers.google.com/console/help/new/#usingkeys">https://developers.google.com/console/help/new/#usingkeys</a>'),
     '#required' => TRUE,
   );
-  return system_settings_form($form);
+
+
+    // Add a submit button
+    $form['actions']['#type'] = 'actions';
+    $form['actions']['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Save configuration'),
+    );
+
+    return $form;
+}
+
+/**
+ * Submit handler for module_settings_form().
+ */
+function agenda_settings_form_submit($form, &$form_state) {
+    $config = config('agenda.settings');
+    $config->set('agenda_googleapi', $form_state['values']['agenda_googleapi']);
+    $config->save();
+    backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 
@@ -235,7 +254,7 @@ function agenda_admin_configure($form, $form_state, $delta) {
   $form['agenda_calendars'] = array(
     '#type'           => 'textarea',
     '#title'          => t('Google Calendar IDs'),
-    '#default_value'  => agenda_variable_get($delta, 'calendars', 'drupalagenda@gmail.com'),
+    '#default_value'  => agenda_variable_get($delta, 'calendars', 'backdropagenda@gmail.com'),
     '#rows'           => 4,
     '#description'    => t("The IDs of each google calendar you want to display, each on a new line. For private calendars, include the access token after the email with a forward slash."),
     '#required'       => TRUE,
@@ -275,7 +294,7 @@ function agenda_admin_configure($form, $form_state, $delta) {
  */
 function agenda_admin_configure_validate($form, &$form_state) {
   // clear the cache
-  drupal_set_message(t('Cache cleared for agenda block'));
+  backdrop_set_message(t('Cache cleared for agenda block'));
   cache_clear_all('agenda_block_' . $form['agenda_bid']['#value'], 'cache');
 
   // calendars (has the form of a valid email address and an optional access key)
@@ -349,8 +368,8 @@ function agenda_admin_configure_submit($form, $form_state) {
     agenda_variable_set($delta, $setting, $value);
   }
 
-  drupal_set_message('Block settings were saved successfully');
-  drupal_goto('admin/config/services/agenda');
+  backdrop_set_message('Block settings were saved successfully');
+  backdrop_goto('admin/config/services/agenda');
 }
 
 
@@ -367,7 +386,7 @@ function agenda_debug($bid) {
 
   // Find calendar sources
   $block      = agenda_settings($bid);
-  $debug_title = array('#markup' => '<h2>' . t('Debugging %calendar block', array('%calendar' => $block->title)) . ' - '.l('Edit','admin/config/services/agenda/'.$bid.'/configure',array('query' => drupal_get_destination())).'</h2>');
+  $debug_title = array('#markup' => '<h2>' . t('Debugging %calendar block', array('%calendar' => $block->title)) . ' - '.l('Edit','admin/config/services/agenda/'.$bid.'/configure',array('query' => backdrop_get_destination())).'</h2>');
   $output[]   = t('Reading calendar input:');
   $output[]   = '<pre>' . htmlspecialchars($block->calendars) . '</pre>';
   $calendars  = preg_split('@\r\n?|\n@', $block->calendars);
@@ -410,7 +429,7 @@ function agenda_debug($bid) {
     return array(
       'title'       => array('#markup' => '<h2>' . t('Debugging %calendar block', array('%calendar' => $block->title)) . ' - '.l('Edit','admin/config/services/agenda/'.$bid.'/configure').'</h2>'),
       'debug_log'   => array('#markup' => $debug_log, '#prefix' => '<h3>Log</h3><div id="agenda-debug-log">', '#suffix' => '</div>'),
-      '#attached'   => array('css' => array(drupal_get_path('module', 'agenda') . '/agenda.css')),
+      '#attached'   => array('css' => array(backdrop_get_path('module', 'agenda') . 'css/agenda.css')),
     );
   }
 
@@ -470,7 +489,7 @@ function agenda_debug($bid) {
     'title'       => $debug_title,
     'debug_log'   => array('#markup' => $debug_log, '#prefix' => '<h3>Log</h3><div id="agenda-debug-log">', '#suffix' => '</div>'),
     'event_table' => array('#markup' => $event_table, '#prefix' => '<h3>Events</h3><div id="agenda-debug-table">', '#suffix' => '</div>'),
-    '#attached'   => array('css' => array(drupal_get_path('module', 'agenda') . '/agenda.css')),
+    '#attached'   => array('css' => array(backdrop_get_path('module', 'agenda') . 'css/agenda.css')),
   );
 }
 
@@ -511,7 +530,7 @@ function agenda_debug_ntp_time($host) {
  * Agenda clear cache
  */
 function agenda_clear($bid) {
-  drupal_set_message(t('Cache cleared for agenda block'));
+  backdrop_set_message(t('Cache cleared for agenda block'));
   cache_clear_all('agenda_block_' . $bid, 'cache');
-  drupal_goto('admin/config/services/agenda');
+  backdrop_goto('admin/config/services/agenda');
 }

@@ -1,10 +1,8 @@
 name = Agenda
 description = Show an agenda of events from a remote source
-core = 7.x
+backdrop = 1.x
+type = module
 configure = admin/config/services/agenda
 dependencies[] = block
 dependencies[] = libraries
-files[] = agenda.admin.php
-files[] = agenda.install
-files[] = agenda.module
-files[] = agenda.test
+

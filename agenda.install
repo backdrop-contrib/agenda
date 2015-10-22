@@ -16,7 +16,7 @@ function agenda_requirements($phase) {
 
   if ($phase == 'runtime') {
     $library = libraries_detect('google-api-php-client');
-    $error_type = isset($library['error']) ? drupal_ucfirst($library['error']) : '';
+    $error_type = isset($library['error']) ? backdrop_ucfirst($library['error']) : '';
     $error_message = isset($library['error message']) ? $library['error message'] : '';
 
     if (empty($library['installed'])) {
@@ -95,7 +95,7 @@ function agenda_install_fixtures() {
     array(1, 'cachetime', '3600'),
     array(1, 'display_keys', 'start time, end date, end time, published, description, link'),
     array(1, 'hide_labels', 'description, link'),
-    array(1, 'calendars', 'drupalagenda@gmail.com'),
+    array(1, 'calendars', 'backdropagenda@gmail.com'),
     array(1, 'timezone', 'UTC'),
   );
 
@@ -152,4 +152,18 @@ function agenda_schema() {
   );
 
   return $schema;
+}
+
+/**
+ * Move agenda settings from variables to config.
+ */
+function agenda_update_1000()
+{
+  // Migrate variables to config.
+  $config = config('agenda.settings');
+  $config->set('agenda_googleapi', update_variable_get('agenda_googleapi', ''));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('agenda_googleapi');
 }

@@ -1,0 +1,5 @@
+[AgendaBlockTestCase]
+name = Agenda block
+description = Tests Agenda block functionality and appearance.
+group = Agenda
+file = agenda.test

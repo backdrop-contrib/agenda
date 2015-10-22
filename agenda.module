@@ -29,7 +29,7 @@ function agenda_menu() {
   $items['admin/config/services/agenda/googleapi'] = array(
     'title' => 'Settings',
     'description' => 'Set Google API Key',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('agenda_admin_googleapi'),
     'access arguments' => array('configure agenda blocks'),
     'type' => MENU_LOCAL_TASK,
@@ -39,7 +39,7 @@ function agenda_menu() {
   $items['admin/config/services/agenda/0/configure'] = array(
     'title'            => 'Add new block',
     'type'             => MENU_LOCAL_ACTION,
-    'page callback'    => 'drupal_get_form',
+    'page callback'    => 'backdrop_get_form',
     'page arguments'   => array('agenda_admin_configure', 4),
     'access arguments' => array('configure agenda blocks'),
     'file'             => 'agenda.admin.php',
@@ -49,7 +49,7 @@ function agenda_menu() {
     'title'            => 'Configure agenda block settings',
     'type'             => MENU_LOCAL_ACTION,
     'context'          => MENU_CONTEXT_INLINE,
-    'page callback'    => 'drupal_get_form',
+    'page callback'    => 'backdrop_get_form',
     'page arguments'   => array('agenda_admin_configure', 4),
     'access arguments' => array('configure agenda blocks'),
     'file'             => 'agenda.admin.php',
@@ -59,7 +59,7 @@ function agenda_menu() {
   $items['admin/config/services/agenda/%/delete'] = array(
     'title'            => 'Delete agenda block',
     'type'             => MENU_CALLBACK,
-    'page callback'    => 'drupal_get_form',
+    'page callback'    => 'backdrop_get_form',
     'page arguments'   => array('agenda_admin_delete', 4),
     'access arguments' => array('configure agenda blocks'),
     'file'             => 'agenda.admin.php',
@@ -145,7 +145,7 @@ function agenda_block_info() {
   while ($block = $res->fetchObject()) {
     $blocks[$block->bid] = array(
       'info'  => t('Agenda: @title', array('@title' => agenda_variable_get($block->bid, 'title', 'New block'))),
-      'cache' => DRUPAL_CACHE_GLOBAL,
+      'cache' => BACKDROP_CACHE_GLOBAL,
     );
   }
   return $blocks;
@@ -167,7 +167,7 @@ function agenda_block_view($delta) {
   }
 
   // Render it
-  $basepath = drupal_get_path('module', 'agenda');
+  $basepath = backdrop_get_path('module', 'agenda');
   return array(
     'subject' => t('Agenda'),
     'content' => array(
@@ -176,8 +176,8 @@ function agenda_block_view($delta) {
       ),
       '#markup'   => $markup,
       '#attached' => array(
-        'css' => array($basepath . '/agenda.css'),
-        'js'  => array($basepath . '/agenda.js'),
+        'css' => array($basepath . 'css/agenda.css'),
+        'js'  => array($basepath . 'js/agenda.js'),
       ),
     ),
   );
@@ -476,7 +476,7 @@ function _agenda_load_google($address, $key, $block) {
   //Including the google-api-php-client library (required).
   $autoload_path = libraries_get_path('google-api-php-client') . '/autoload.php';
   if (!file_exists($autoload_path)) {
-    drupal_set_message('Agenda: The google-api-php-client library was not found.
+    backdrop_set_message('Agenda: The google-api-php-client library was not found.
       See admin/reports/status and/or the Agenda module\'s README for more
       information.', 'error');
     return;
@@ -502,8 +502,8 @@ function _agenda_load_google($address, $key, $block) {
     $events = $service->events->listEvents($calendar_id, $optParams);
   }
   catch (Exception $e) {
-    drupal_set_message(t('Agenda: Bad call to list events. Check Google API Key or Calendar Address.'), 'error');
-    drupal_set_message('<pre>'.$e.'</pre>', 'error');
+    backdrop_set_message(t('Agenda: Bad call to list events. Check Google API Key or Calendar Address.'), 'error');
+    backdrop_set_message('<pre>'.$e.'</pre>', 'error');
     return;
   }
 
@@ -562,4 +562,25 @@ function agenda_group_events_for_block($block, array $events) {
     $count++;
   }
   return $events;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function agenda_autoload_info() {
+  return array(
+    'AgendaWebTestCase' => 'tests/agenda.test',
+    'AgendaBlockTestCase' => 'tests/agenda.test',
+  );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function agenda_config_info() {
+  $prefixes['agenda.settings'] = array(
+    'label' => t('Agenda'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
 }

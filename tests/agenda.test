@@ -8,20 +8,13 @@
 /**
  * Base class for all Agenda web test cases.
  */
-class AgendaWebTestCase extends DrupalWebTestCase {
+class AgendaWebTestCase extends BackdropWebTestCase {
   public function setUp() {
     parent::setUp(array('agenda'));
   }
 }
 
 class AgendaBlockTestCase extends AgendaWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Agenda block',
-      'description' => 'Tests Agenda block functionality and appearance.',
-      'group' => 'Agenda',
-    );
-  }
 
   public function testNicknamedDays() {
     // Get sample block.

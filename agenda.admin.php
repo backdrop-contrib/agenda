@@ -117,7 +117,7 @@ function agenda_admin_googleapi($form, &$form_state){
 /**
  * Submit handler for module_settings_form().
  */
-function agenda_settings_form_submit($form, &$form_state) {
+function agenda_admin_googleapi_submit($form, &$form_state) {
     $config = config('agenda.settings');
     $config->set('agenda_googleapi', $form_state['values']['agenda_googleapi']);
     $config->save();

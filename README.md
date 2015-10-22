@@ -40,8 +40,8 @@ need to download and install in your libraries folder.
    + Check admin/reports/status to ensure it is installed properly.
 
 - To obtain a Google API Developer ID key:
-   + Navigate to https://code.google.com/apis/console.
-   + Create a project.
+   + Navigate to https://console.developers.google.com/start
+   + Select 'Use Google APIs' and create a project.
    + Navigate to "APIs" in the left menu of the new project and turn on 
      the Calendar API (agree to the Terms of Service).
    + Navigate to "Credentials" in the left menu under "APIs & auth".

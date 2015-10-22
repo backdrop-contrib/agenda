@@ -12,6 +12,10 @@ as rounded corners, and click-toggling extra information.
 
 This is a port from the Drupal module of the same name. 
 
+## Status
+
+This is an initial port of the module ready for testing but not for use.
+
 ## Requirements
 
 This module depends on the Google api php client library which you

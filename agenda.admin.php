@@ -429,7 +429,7 @@ function agenda_debug($bid) {
     return array(
       'title'       => array('#markup' => '<h2>' . t('Debugging %calendar block', array('%calendar' => $block->title)) . ' - '.l('Edit','admin/config/services/agenda/'.$bid.'/configure').'</h2>'),
       'debug_log'   => array('#markup' => $debug_log, '#prefix' => '<h3>Log</h3><div id="agenda-debug-log">', '#suffix' => '</div>'),
-      '#attached'   => array('css' => array(backdrop_get_path('module', 'agenda') . 'css/agenda.css')),
+      '#attached'   => array('css' => array(backdrop_get_path('module', 'agenda') . '/css/agenda.css')),
     );
   }
 
@@ -489,7 +489,7 @@ function agenda_debug($bid) {
     'title'       => $debug_title,
     'debug_log'   => array('#markup' => $debug_log, '#prefix' => '<h3>Log</h3><div id="agenda-debug-log">', '#suffix' => '</div>'),
     'event_table' => array('#markup' => $event_table, '#prefix' => '<h3>Events</h3><div id="agenda-debug-table">', '#suffix' => '</div>'),
-    '#attached'   => array('css' => array(backdrop_get_path('module', 'agenda') . 'css/agenda.css')),
+    '#attached'   => array('css' => array(backdrop_get_path('module', 'agenda') . '/css/agenda.css')),
   );
 }
 

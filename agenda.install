@@ -29,7 +29,7 @@ function agenda_requirements($phase) {
           the %path directory on your server.', array(
             '!error' => $error_message,
             '!google_api' => l($t('Google API PHP Client'), $library['download url']),
-            '%path' => 'sites/all/libraries',
+            '%path' => 'libraries',
           )),
       );
     }

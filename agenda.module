@@ -176,8 +176,8 @@ function agenda_block_view($delta) {
       ),
       '#markup'   => $markup,
       '#attached' => array(
-        'css' => array($basepath . 'css/agenda.css'),
-        'js'  => array($basepath . 'js/agenda.js'),
+        'css' => array($basepath . '/css/agenda.css'),
+        'js'  => array($basepath . '/js/agenda.js'),
       ),
     ),
   );
@@ -474,7 +474,7 @@ function _agenda_load_google($address, $key, $block) {
   $googlekey = (!empty($block->googleapi_override)) ? $block->googleapi_override : variable_get('agenda_googleapi', '');
 
   //Including the google-api-php-client library (required).
-  $autoload_path = libraries_get_path('google-api-php-client') . '/autoload.php';
+  $autoload_path = libraries_get_path('google-api-php-client') . '/src/Google/autoload.php';
   if (!file_exists($autoload_path)) {
     backdrop_set_message('Agenda: The google-api-php-client library was not found.
       See admin/reports/status and/or the Agenda module\'s README for more

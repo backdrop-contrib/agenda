@@ -273,7 +273,7 @@ function agenda_admin_configure($form, $form_state, $delta) {
   $form['agenda_googleapi_override'] = array(
     '#type'           => 'textfield',
     '#title'          => t('Google API Key'),
-    '#default_value'  => agenda_variable_get($delta, 'googleapi_override', ''),
+    '#default_value'  => config_get('agenda.settings','agenda_googleapi'),
     '#size'           => 39,
     '#maxlength'      => 39,
     '#description'    => t("Use this Google API key instead of default set on agenda settings page."),
